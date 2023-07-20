@@ -1,0 +1,4 @@
+{
+  "dart.devToolsLocation": "external"
+  "cmake.configureOnOpen": false
+}
