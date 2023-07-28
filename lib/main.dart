@@ -114,21 +114,16 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: const Icon(Icons.add))
         ],
       ),
-      body: ListView(children: <Widget>[
-        // const SizedBox(
-        //   width: double.infinity,
-        //   child: Card(
-        //     color: Colors.blue,
-        //     elevation: 5,
-        //     child: Text('Grafico'),
-        //   ),
-        // ),
-        Chart(recentTranscation: _recentTransactions),
-        TransactionList(
-          transactions: _transactions,
-          onRemove: _removeTransaction,
+      body: ListView(
+        children: <Widget>[
+        
+          Chart(recentTranscation: _recentTransactions),
+          TransactionList(
+            transactions: _transactions,
+            onRemove: _removeTransaction,
           ),
-      ]),
+        ]
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openTransactionFormModal(context),
         child: const Icon(
