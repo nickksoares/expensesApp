@@ -22,18 +22,21 @@ class ChartBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return  Column(
       children: <Widget>[
-        FittedBox
-        (
-          child: Text(
-            '${value.toStringAsFixed(2)}'
-          )
+        Container(
+          height: 20,
+          alignment: AlignmentDirectional.center,
+          child: FittedBox(
+            child: Text(
+              '${value.toStringAsFixed(2)}'
+            )
+          ),
         ),
         const SizedBox(height: 5,),
-        Container(
+        SizedBox(
           height: 60,
           width: 10,
           child: Stack(
-            alignment: AlignmentDirectional.bottomCenter,
+            alignment: Alignment.bottomCenter,
             children: <Widget>[
               Container(
                 decoration: BoxDecoration(

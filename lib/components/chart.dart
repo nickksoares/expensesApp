@@ -2,13 +2,17 @@ import 'package:expenses/components/chart_bar.dart';
 import 'package:expenses/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 
 class Chart extends StatelessWidget {
   const Chart({super.key, required this.recentTranscation});
-
   final List<Transaction> recentTranscation;
 
+
+
   List<Map<String, Object>> get groupedTransactions{
+    initializeDateFormatting('pt_BR');
     return List.generate(7, (index){
       final weekDay = DateTime.now().subtract(
         Duration(
@@ -28,9 +32,10 @@ class Chart extends StatelessWidget {
       
       }
       return {
-        'day': DateFormat.E().format(weekDay)[0], 
+        
+        'day': DateFormat.E('pt_BR').format(weekDay)[0].toUpperCase(), 
         'value': totalSum,};
-    });
+    }).reversed.toList();
   }
 
   double get _weekTotalValue{
@@ -54,7 +59,7 @@ class Chart extends StatelessWidget {
               child: ChartBar(
                 label: tr['day'] as String, 
                 value: tr['value'] as double, 
-                percentage: (tr['value'] as double) / _weekTotalValue,
+                percentage: _weekTotalValue == 0 ? 0 :(tr['value'] as double) / _weekTotalValue,
                 ),
             );
           }).toList(),
