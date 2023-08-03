@@ -1,7 +1,9 @@
+import 'dart:math';
+import 'dart:io';
 import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:expenses/components/transaction_list.dart';
 import '/models/transaction.dart';
 
@@ -26,14 +28,12 @@ class ExpensesApp extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
-              
             ),
             titleMedium: const TextStyle(
-              fontFamily: 'OpenSans',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.purple
-            ),
+                fontFamily: 'OpenSans',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple),
             titleSmall: const TextStyle(
                 fontFamily: 'OpenSans',
                 fontSize: 14,
@@ -61,10 +61,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _transactions = <Transaction>[
-   
-  ];
-
+  final _transactions = <Transaction>[];
+  bool _showChart = false;
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
       return tr.date.isAfter(DateTime.now().subtract(const Duration(days: 7)));
@@ -85,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).pop();
   }
 
-  _removeTransaction(String id){
+  _removeTransaction(String id) {
     setState(() {
       _transactions.removeWhere((tr) => tr.id == id);
     });
@@ -93,44 +91,93 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _openTransactionFormModal(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (_) {
-          return TransactionForm(
-            onSubmit: _addTransaction,
-          );
-        });
+      context: context,
+      builder: (_) {
+        return TransactionForm(onSubmit: _addTransaction);
+      },
+    );
   }
 
+  Widget _getIconButton({required IconData icon , required Function() function}){
+    return Platform.isIOS
+    ? GestureDetector(onTap: function,child: Icon(icon))
+    : IconButton(icon: Icon(icon) ,onPressed: function, );
+  }
+
+////////////////////////////////////////////////////////////////
+///                  WIDGET BUILD              ////////////////
+//////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Despesas da Ala',
+    final mQuery = MediaQuery.of(context);
+    bool isLandscape = mQuery.orientation == Orientation.landscape;
+
+    final actions = <Widget>[
+      if (isLandscape)
+        _getIconButton(
+          icon: _showChart ? Icons.list : Icons.bar_chart_rounded,
+          function: () {
+            setState(() {
+              _showChart = !_showChart;
+            });
+          },
         ),
-        actions: [
-          IconButton(
-              onPressed: () => _openTransactionFormModal(context),
-              icon: const Icon(Icons.add))
-        ],
+      _getIconButton(
+          icon: Platform.isIOS ? CupertinoIcons.add : Icons.add,
+          function: _openTransactionFormModal(context),
+      )
+    ];
+
+    final appBar = AppBar(
+      title: const Text(
+        'Despesas da Ala',
       ),
-      body: ListView(
-        children: <Widget>[
-        
-          Chart(recentTranscation: _recentTransactions),
-          TransactionList(
+      actions: actions,
+    );
+
+    final avaliableHeight =
+        mQuery.size.height - appBar.preferredSize.height - mQuery.padding.top;
+
+    final bodyPage = ListView(children: <Widget>[
+      if (_showChart || !isLandscape)
+        SizedBox(
+            height: avaliableHeight * (isLandscape ? 0.7 : .25),
+            child: Chart(recentTranscation: _recentTransactions)),
+      if (!_showChart || !isLandscape)
+        SizedBox(
+          height: avaliableHeight * (isLandscape ? 1.0 : .75),
+          child: TransactionList(
             transactions: _transactions,
             onRemove: _removeTransaction,
           ),
-        ]
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openTransactionFormModal(context),
-        child: const Icon(
-          Icons.add,
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+    ]);
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: const Text('Despesas da Ala'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: actions,
+              ),
+            ),
+            child: bodyPage,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: bodyPage,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    onPressed: () => _openTransactionFormModal(context),
+                    child: const Icon(
+                      Icons.add,
+                    ),
+                  ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+          );
   }
+  ///////////////////////////////////////////////////////////////////////////
 }
