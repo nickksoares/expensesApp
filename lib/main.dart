@@ -98,24 +98,31 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _getIconButton({required IconData icon , required Function() function}){
+  Widget _getIconButton(
+      {required IconData icon, required Function() function}) {
     return Platform.isIOS
-    ? GestureDetector(onTap: function,child: Icon(icon))
-    : IconButton(icon: Icon(icon) ,onPressed: function, );
+        ? GestureDetector(onTap: function, child: Icon(icon))
+        : IconButton(
+            icon: Icon(icon),
+            onPressed: function,
+          );
   }
 
 ////////////////////////////////////////////////////////////////
-///                  WIDGET BUILD              ////////////////
+  ///                  WIDGET BUILD              ////////////////
 //////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
     final mQuery = MediaQuery.of(context);
     bool isLandscape = mQuery.orientation == Orientation.landscape;
 
+    final iconList = Platform.isIOS ? CupertinoIcons.refresh : Icons.bar_chart;
+    final chartList = Platform.isIOS ? CupertinoIcons.chart_bar : Icons.show_chart;
+
     final actions = <Widget>[
       if (isLandscape)
         _getIconButton(
-          icon: _showChart ? Icons.list : Icons.bar_chart_rounded,
+          icon: _showChart ? iconList : chartList,
           function: () {
             setState(() {
               _showChart = !_showChart;
@@ -123,8 +130,8 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ),
       _getIconButton(
-          icon: Platform.isIOS ? CupertinoIcons.add : Icons.add,
-          function: ()=>_openTransactionFormModal(context),
+        icon: Platform.isIOS ? CupertinoIcons.add : Icons.add,
+        function: () => _openTransactionFormModal(context),
       )
     ];
 
@@ -138,20 +145,22 @@ class _MyHomePageState extends State<MyHomePage> {
     final avaliableHeight =
         mQuery.size.height - appBar.preferredSize.height - mQuery.padding.top;
 
-    final bodyPage = ListView(children: <Widget>[
-      if (_showChart || !isLandscape)
-        SizedBox(
-            height: avaliableHeight * (isLandscape ? 0.7 : .25),
-            child: Chart(recentTranscation: _recentTransactions)),
-      if (!_showChart || !isLandscape)
-        SizedBox(
-          height: avaliableHeight * (isLandscape ? 1.0 : .75),
-          child: TransactionList(
-            transactions: _transactions,
-            onRemove: _removeTransaction,
+    final bodyPage = SafeArea(
+      child: ListView(children: <Widget>[
+        if (_showChart || !isLandscape)
+          SizedBox(
+              height: avaliableHeight * (isLandscape ? 0.7 : .25),
+              child: Chart(recentTranscation: _recentTransactions)),
+        if (!_showChart || !isLandscape)
+          SizedBox(
+            height: avaliableHeight * (isLandscape ? 1.0 : .75),
+            child: TransactionList(
+              transactions: _transactions,
+              onRemove: _removeTransaction,
+            ),
           ),
-        ),
-    ]);
+      ]),
+    );
 
     return Platform.isIOS
         ? CupertinoPageScaffold(
